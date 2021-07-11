@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.xml.ws.WebServiceException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -99,18 +98,12 @@ public class TvdbParser {
     public static List<Actor> getActors(String urlString) throws TvDbException {
         List<Actor> results = new ArrayList<>();
         Actor actor;
-        Document doc;
         NodeList nlActor;
         Node nActor;
         Element eActor;
 
-        try {
-            doc = DOMHelper.getEventDocFromUrl(urlString);
-            if (doc == null) {
-                return results;
-            }
-        } catch (WebServiceException ex) {
-            LOG.trace(ERROR_GET_XML, ex);
+        Document doc = DOMHelper.getEventDocFromUrl(urlString);
+        if (doc == null) {
             return results;
         }
 
@@ -465,13 +458,7 @@ public class TvdbParser {
         banner.setColours(DOMHelper.getValueFromElement(eBanner, "Colors"));
         banner.setRating(DOMHelper.getValueFromElement(eBanner, RATING));
         banner.setRatingCount(DOMHelper.getValueFromElement(eBanner, "RatingCount"));
-
-        try {
-            banner.setSeriesName(Boolean.parseBoolean(DOMHelper.getValueFromElement(eBanner, SERIES_NAME)));
-        } catch (WebServiceException ex) {
-            LOG.trace("Failed to transform SeriesName to boolean", ex);
-            banner.setSeriesName(false);
-        }
+        banner.setSeriesName(Boolean.parseBoolean(DOMHelper.getValueFromElement(eBanner, SERIES_NAME)));
 
         return banner;
     }
@@ -532,16 +519,8 @@ public class TvdbParser {
      * @return the value, 0 if not found or an error.
      */
     private static int getEpisodeValue(Element eEpisode, String key) {
-        int episodeValue;
-        try {
-            String value = DOMHelper.getValueFromElement(eEpisode, key);
-            episodeValue = NumberUtils.toInt(value, 0);
-        } catch (WebServiceException ex) {
-            LOG.trace("Failed to read episode value", ex);
-            episodeValue = 0;
-        }
-
-        return episodeValue;
+        String value = DOMHelper.getValueFromElement(eEpisode, key);
+        return NumberUtils.toInt(value, 0);
     }
 
     /**
